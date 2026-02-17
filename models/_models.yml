@@ -1,0 +1,237 @@
+version: 2
+models:
+## Final
+  - name: eligibility
+    description: Final eligibility for the input layer.
+    config:
+      schema: input_layer
+      alias: eligibility
+      materialized: table
+    tests:
+      - unique:
+          column_name: "(person_id || '-' || enrollment_start_date || '-' || enrollment_end_date)"
+    columns:
+      - name: person_id
+        tests:
+          - not_null
+      - name: gender
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: birth_date
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: enrollment_start_date
+        tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: medical_claim
+    description: Final medical claims for the input layer.
+    config:
+      schema: input_layer
+      alias: medical_claim
+      materialized: table
+    tests:
+      - unique:
+          column_name: "(claim_id || '-' || claim_line_number)"
+    columns:
+      - name: claim_id
+        tests:
+          - not_null
+      - name: claim_line_number
+        tests:
+          - not_null
+      - name: person_id
+        tests:
+          - not_null
+      - name: paid_amount
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              config:
+                severity: warn
+      - name: allowed_amount
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              config:
+                severity: warn
+
+  - name: pharmacy_claim
+    description: >
+      Final pharmacy claims for the input layer. Unions all deduped pharmacy
+      claim sources (Regence, IMA Rx).
+    config:
+      schema: input_layer
+      alias: pharmacy_claim
+      materialized: table
+    tests:
+      - unique:
+          column_name: "(claim_id || '-' || claim_line_number)"
+    columns:
+      - name: claim_id
+        tests:
+          - not_null
+      - name: claim_line_number
+        tests:
+          - not_null
+      - name: person_id
+        tests:
+          - not_null
+      - name: ndc_code
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: paid_amount
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              config:
+                severity: warn
+      - name: allowed_amount
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              config:
+                severity: warn
+
+## Intermediate
+  - name: int_eligibility
+    description: >
+      Final de-duplication, transformation logic, and mapping missing fields.
+    config:
+      schema: _int_input_layer
+      alias: eligibility
+      materialized: table
+
+  - name: int_medical_claim_adr
+    description: Applying adjustment logic for medical claims.
+    config:
+      schema: _int_input_layer
+      alias: medical_claim_adr
+      materialized: table
+
+  - name: int_medical_claim_deduped
+    description: >
+      Final de-duplication, transformation logic, and mapping missing fields.
+    config:
+      schema: _int_input_layer
+      alias: medical_claim_deduped
+      materialized: table
+
+  - name: int_pharmacy_claim_adr
+    description: Applying adjustment logic for pharmacy claims.
+    config:
+      schema: _int_input_layer
+      alias: pharmacy_claim_adr
+      materialized: table
+
+  - name: int_pharmacy_claim_deduped
+    description: >
+      Final de-duplication, transformation logic, and mapping missing fields.
+    config:
+      schema: _int_input_layer
+      alias: pharmacy_claim_deduped
+      materialized: table
+
+  - name: int_pharmacy_ima_claim_adr
+    description: >
+      Applying adjustment / denial / reversal logic for IMA Rx specialty
+      pharmacy claims. All records are treated as final; claim_status is
+      preserved but not used to filter.
+    config:
+      schema: _int_input_layer
+      alias: pharmacy_ima_claim_adr
+      materialized: table
+
+  - name: int_pharmacy_ima_claim_deduped
+    description: >
+      Final de-duplication and financial field mapping for IMA Rx specialty
+      pharmacy claims.
+    config:
+      schema: _int_input_layer
+      alias: pharmacy_ima_claim_deduped
+      materialized: table
+
+  ## Staging
+  - name: stg_eligibility
+    description: >
+      Source to target mapping from Regence membership source to the 
+      Tuva Data Model.
+    config:
+      schema: _stg_input_layer
+      alias: eligibility
+      materialized: table
+
+  - name: stg_medical_claim
+    description: >
+      Source to target mapping from Regence medical claim source to the 
+      Tuva Data Model.
+    config:
+      schema: _stg_input_layer
+      alias: medical_claim
+      materialized: table
+
+  - name: stg_pharmacy_claim
+    description: >
+      Source to target mapping from Regence pharmacy claim source to the 
+      Tuva Data Model.
+    config:
+      schema: _stg_input_layer
+      alias: pharmacy_claim
+      materialized: table
+
+  - name: stg_pharmacy_ima_claim
+    description: >
+      Raw source mapping for IMA Rx specialty pharmacy claims. Brings in
+      all columns as-is with column renames and type casting only.
+    config:
+      schema: _stg_input_layer
+      alias: pharmacy_ima_claim
+      materialized: table
+
+  ## Data Quality
+  - name: data_quality__claim_volume
+    config:
+      schema: connector_data_quality
+      alias: claim_volume
+      materialized: table
+
+  - name: data_quality__eligibility_dedupe_accounting
+    config:
+      schema: connector_data_quality
+      alias: eligibility_dedupe_accounting
+      materialized: table
+
+  - name: data_quality__medical_claim_dedupe_accounting
+    config:
+      schema: connector_data_quality
+      alias: medical_claim_dedupe_accounting
+      materialized: table
+
+  - name: data_quality__pharmacy_claim_dedupe_accounting
+    config:
+      schema: connector_data_quality
+      alias: pharmacy_claim_dedupe_accounting
+      materialized: table
+
+  - name: data_quality__summary
+    description: >
+      Summarizes the dedupe accounting for eligibility, medical claim, 
+      and pharmacy claim
+    config:
+      schema: connector_data_quality
+      alias: summary
+      materialized: table
+
+  - name: ingestion__file_row_count
+    config:
+      schema: connector_data_quality
+      alias: ingestion_file_row_count
+      materialized: table

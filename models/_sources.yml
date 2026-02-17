@@ -1,0 +1,32 @@
+version: 2
+
+sources:
+  - name: select_health
+    description: >
+      Health Catalyst employee-sponsored insurance claims directly from Select
+      Health.
+    database: fivetran
+    schema: select_health
+    tables:
+      - name: eligibility
+      - name: medical_claim
+      - name: pharmacy_claim
+
+  - name: tuva_historical_select_health
+    description: >
+      Health Catalyst employee-sponsored insurance claims directly from Select Health.
+    database: tuva_raw_hcat_select_health_copy
+    schema: _stg_input_layer
+    tables:
+      - name: eligibility
+      - name: medical_claim
+      - name: pharmacy_claim
+
+  - name: ima_rx
+    description: >
+      Health Catalyst specialty pharmacy claims from IMA Rx, a PBM intermediary.
+      Employer pays full billed amount with no member cost share.
+    database: fivetran
+    schema: box
+    tables:
+      - name: ima_hcat_rx_analysis_by_membe
