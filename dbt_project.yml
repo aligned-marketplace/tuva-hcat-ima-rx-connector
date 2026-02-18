@@ -1,4 +1,4 @@
-name: 'tuva_select_health_connector'
+name: 'tuva_hcat_ima_rx_connector'
 version: '0.0.1'
 config-version: 2
 
@@ -15,9 +15,9 @@ vars:
 # stay shared after a --full-refresh. The custom macro snowflake__seed_helpers is also required.
 models:
   +copy_grants: true
-  +database: tuva_select_health  # Add this line at the top level
-  tuva_select_health_connector:
-    +database: tuva_select_health
+  +database: tuva_hcat_ima_rx
+  tuva_hcat_ima_rx_connector:
+    +database: tuva_hcat_ima_rx
 
 seeds:
   +copy_grants: true
