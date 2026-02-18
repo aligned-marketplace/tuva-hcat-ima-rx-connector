@@ -1,6 +1,24 @@
 version: 2
 models:
 ## Final
+  - name: eligibility
+    description: >
+      Stub: no eligibility data in IMA Rx connector.
+      Empty model satisfies Tuva dependency graph.
+    config:
+      schema: input_layer
+      alias: eligibility
+      materialized: table
+
+  - name: medical_claim
+    description: >
+      Stub: no medical claim data in IMA Rx connector.
+      Empty model satisfies Tuva dependency graph.
+    config:
+      schema: input_layer
+      alias: medical_claim
+      materialized: table
+
   - name: pharmacy_claim
     description: Final pharmacy claims for the input layer.
     config:
