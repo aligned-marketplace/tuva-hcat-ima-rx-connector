@@ -9,3 +9,19 @@ sources:
     schema: box
     tables:
       - name: ima_hcat_rx_analysis_by_membe
+
+  - name: tuva_regence
+    description: >
+      Regence connector eligibility in the Tuva input layer.
+    database: tuva_regence
+    schema: input_layer
+    tables:
+      - name: eligibility
+
+  - name: tuva_select_health
+    description: >
+      Select Health connector eligibility in the Tuva input layer.
+    database: tuva_select_health
+    schema: input_layer
+    tables:
+      - name: eligibility

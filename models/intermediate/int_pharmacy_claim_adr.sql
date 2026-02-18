@@ -12,7 +12,7 @@ with staged as (
         , s.claim_line_sequence_id
         , s.claim_status
         , s.adjustment_code
-        , concat(s.member_id, s.dependent_code)   as member_id
+        , s.member_id
         , s.ndc_code
         , s.rx_vendor                              as type_of_pharmacy
         , s.service_date                           as dispensing_date
@@ -23,8 +23,6 @@ with staged as (
         , 0                                        as coinsurance_amount
         , null                                     as prescribing_provider_npi
         , null                                     as dispensing_provider_npi
-        , 'Health Catalyst'                        as payer
-        , s.carrier_product_description            as plan
         , 'IMA Rx'                                 as data_source
         , s.file_name
         , s.file_date
@@ -53,8 +51,6 @@ select
     , cast(coinsurance_amount as numeric(38,2))                    as coinsurance_amount
     , cast(prescribing_provider_npi as {{ dbt.type_string() }})    as prescribing_provider_npi
     , cast(dispensing_provider_npi as {{ dbt.type_string() }})     as dispensing_provider_npi
-    , cast(payer as {{ dbt.type_string() }})                       as payer
-    , cast(plan as {{ dbt.type_string() }})                        as plan
     , cast(data_source as {{ dbt.type_string() }})                 as data_source
     , cast(file_name as {{ dbt.type_string() }})                   as file_name
     , cast(file_date as date)                                      as file_date

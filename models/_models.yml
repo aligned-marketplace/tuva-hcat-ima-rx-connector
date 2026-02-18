@@ -70,9 +70,20 @@ models:
   - name: int_pharmacy_claim_deduped
     description: >
       Final de-duplication and financial field mapping for pharmacy claims.
+      Joins to carrier eligibility lookup for person_id and plan.
     config:
       schema: _int_input_layer
       alias: pharmacy_claim_deduped
+      materialized: table
+
+  - name: int_carrier_eligibility_lookup
+    description: >
+      Unions Regence and Select Health eligibility, joins to IMA members
+      on name + DOB, then deduplicates per individual_id to get the latest
+      person_id and plan.
+    config:
+      schema: _int_input_layer
+      alias: carrier_eligibility_lookup
       materialized: table
 
   ## Staging
