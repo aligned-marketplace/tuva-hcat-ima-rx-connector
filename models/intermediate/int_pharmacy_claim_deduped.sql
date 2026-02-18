@@ -18,7 +18,7 @@ select
     , cast(1 as integer)                                               as claim_line_number
     , cast(coalesce(cl.person_id, adr.member_id) as {{ dbt.type_string() }})  as person_id
     , cast(coalesce(cl.person_id, adr.member_id) as {{ dbt.type_string() }})  as member_id
-    , cast(cl.carrier_data_source as {{ dbt.type_string() }})          as payer
+    , cast(cl.payer as {{ dbt.type_string() }})                         as payer
     , cast(cl.plan as {{ dbt.type_string() }})                         as plan
     , cast(adr.prescribing_provider_npi as {{ dbt.type_string() }})    as prescribing_provider_npi
     , cast(adr.dispensing_provider_npi as {{ dbt.type_string() }})     as dispensing_provider_npi

@@ -8,6 +8,7 @@ with regence_elig as (
         , first_name
         , last_name
         , birth_date
+        , payer
         , plan
         , data_source
         , enrollment_start_date
@@ -25,6 +26,7 @@ with regence_elig as (
         , first_name
         , last_name
         , birth_date
+        , payer
         , plan
         , data_source
         , enrollment_start_date
@@ -61,6 +63,7 @@ with regence_elig as (
     select
           ima.individual_id
         , elig.person_id
+        , elig.payer
         , elig.plan
         , elig.data_source       as carrier_data_source
         , elig.enrollment_start_date
@@ -84,6 +87,7 @@ with regence_elig as (
 select
       individual_id
     , person_id
+    , payer
     , plan
     , carrier_data_source
 from joined
