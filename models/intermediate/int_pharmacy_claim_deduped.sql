@@ -35,7 +35,7 @@ select
     , cast(null as numeric(38,2))                                      as copayment_amount
     , cast(null as numeric(38,2))                                      as deductible_amount
     , cast(null as integer)                                            as in_network_flag
-    , cast(adr.data_source as {{ dbt.type_string() }})                 as data_source
+    , cast(coalesce(cl.carrier_data_source, adr.data_source) as {{ dbt.type_string() }})  as data_source
     , cast(adr.file_name as {{ dbt.type_string() }})                   as file_name
     , cast(adr.file_date as date)                                      as file_date
     , cast(adr.ingest_datetime as datetime)                            as ingest_datetime
