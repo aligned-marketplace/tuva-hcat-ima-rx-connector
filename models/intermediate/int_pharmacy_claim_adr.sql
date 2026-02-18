@@ -5,30 +5,7 @@ with staged as (
 
 )
 
-, get_first_ingest_datetime as (
-
-    select
-          claim_id
-        , min(ingest_datetime) as first_ingest_datetime
-    from staged
-    group by claim_id
-
-)
-
-, claim_line_totals as (
-
-    select
-          claim_id
-        , sum(quantity)      as sum_quantity
-        , sum(days_supply)   as sum_days_supply
-        , sum(billed_amount) as sum_paid_amount        -- employer-paid amount
-        , 0                  as sum_coinsurance_amount -- no member liability
-    from staged
-    group by claim_id
-
-)
-
-, ordered as (
+, deduped as (
 
     select
           s.claim_id
@@ -40,10 +17,10 @@ with staged as (
         , s.rx_vendor                              as type_of_pharmacy
         , s.service_date                           as dispensing_date
         , s.paid_date
-        , clt.sum_quantity                         as quantity
-        , clt.sum_days_supply                      as days_supply
-        , clt.sum_paid_amount                      as paid_amount
-        , clt.sum_coinsurance_amount               as coinsurance_amount
+        , s.quantity
+        , s.days_supply
+        , s.billed_amount                          as paid_amount
+        , 0                                        as coinsurance_amount
         , null                                     as prescribing_provider_npi
         , null                                     as dispensing_provider_npi
         , 'Health Catalyst'                        as payer
@@ -51,16 +28,12 @@ with staged as (
         , 'IMA Rx'                                 as data_source
         , s.file_name
         , s.file_date
-        , gfid.first_ingest_datetime               as ingest_datetime
+        , s.ingest_datetime
         , row_number() over (
             partition by s.claim_id
-            order by s.paid_date desc
+            order by s.file_date desc, s.ingest_datetime desc
           )                                        as row_num
     from staged as s
-    left join claim_line_totals as clt
-        on s.claim_id = clt.claim_id
-    left join get_first_ingest_datetime as gfid
-        on s.claim_id = gfid.claim_id
 
 )
 
@@ -87,4 +60,4 @@ select
     , cast(file_date as date)                                      as file_date
     , cast(ingest_datetime as datetime)                            as ingest_datetime
     , cast(row_num as integer)                                     as row_num
-from ordered
+from deduped
